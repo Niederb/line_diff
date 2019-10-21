@@ -1,0 +1,10 @@
+[package]
+name = "line_diff"
+version = "0.1.0"
+authors = ["Thomas Niederberger <thomas@niederb.ch>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+difference = "2.0"
