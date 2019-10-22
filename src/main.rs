@@ -14,6 +14,24 @@ use difference::Difference::{Same, Add, Rem};
 extern crate prettytable;
 use prettytable::{Cell, Row, Table};
 
+fn get_line_from_file(filename: &str) -> String {
+    let file = File::open(filename).unwrap();
+    let reader = BufReader::new(file);
+
+    let mut s = "".to_owned();
+    for (index, line) in reader.lines().enumerate() {
+        let line = line.unwrap();
+
+        if index == 0 {
+            s = line.to_owned();
+		} else {
+            println!("File contains additional lines that will be ignored");
+            break;
+        }
+    }
+    s.to_string()
+}
+
 fn get_lines_from_file(filename: &str) -> (String, String) {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
@@ -66,6 +84,18 @@ fn main() {
                 .takes_value(true),
         )
 		.arg(
+            Arg::with_name("file1")
+                .short("x")
+                .help("File containing the first line for comparison")
+                .takes_value(true),
+        )
+		.arg(
+            Arg::with_name("file2")
+                .short("y")
+                .help("File containing the second line for comparison")
+                .takes_value(true),
+        )
+		.arg(
             Arg::with_name("separator")
                 .short("s")
                 .help("Separator for splitting lines")
@@ -76,7 +106,13 @@ fn main() {
     let (s1, s2) = if matches.is_present("file") {
         let input_file = matches.value_of("file").unwrap_or("");
         get_lines_from_file(input_file)
-    } else {
+    } else if matches.is_present("file1") && matches.is_present("file2") {
+		let input_file = matches.value_of("file1").unwrap_or("");
+        let s1 = get_line_from_file(input_file);
+		let input_file = matches.value_of("file2").unwrap_or("");
+        let s2 = get_line_from_file(input_file);
+		(s1, s2)
+	} else {
         get_lines_from_cmd()
     };
 

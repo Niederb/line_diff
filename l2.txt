@@ -1,0 +1,1 @@
+set(OpenCV_INCLUDE_DIRS "C:/LV_DEVELOPMENT/opencv-2.4.13.6/build" "C:/LV_DEVELOPMENT/opencv-2.4.13.6/include" "C:/LV_DEVELOPMENT/opencv-2.4.13.6/include/opencv")
