@@ -65,6 +65,12 @@ fn main() {
                 .help("File containing the two lines to compare")
                 .takes_value(true),
         )
+		.arg(
+            Arg::with_name("separator")
+                .short("s")
+                .help("Separator for splitting lines")
+                .takes_value(true),
+        )
         .get_matches();
 
     let (s1, s2) = if matches.is_present("file") {
@@ -74,7 +80,7 @@ fn main() {
         get_lines_from_cmd()
     };
 
-    let separator = ";";
+    let separator = matches.value_of("separator").unwrap_or(";");
     let s1 = s1.replace(separator, "\n");
     let s2 = s2.replace(separator, "\n");
 
