@@ -8,6 +8,11 @@ use std::io::{BufRead, BufReader};
 
 use difference::Changeset;
 use difference::Difference;
+use difference::Difference::{Same, Add, Rem};
+
+#[macro_use]
+extern crate prettytable;
+use prettytable::{Cell, Row, Table};
 
 fn get_lines_from_file(filename: &str) -> (String, String) {
     let file = File::open(filename).unwrap();
@@ -18,9 +23,9 @@ fn get_lines_from_file(filename: &str) -> (String, String) {
     for (index, line) in reader.lines().enumerate() {
         let line = line.unwrap();
 
-        if (index == 0) {
+        if index == 0 {
             s1 = line.to_owned();
-        } else if (index == 1) {
+        } else if index == 1 {
             s2 = line.to_owned();
         } else {
             println!("File contains additional lines that will be ignored");
@@ -34,6 +39,19 @@ fn get_lines_from_cmd() -> (String, String) {
     //let mut buffer = String::new();
     //io::stdin().read_to_string(&mut buffer)?;
     ("".to_owned(), "".to_owned())
+}
+
+fn print_results(diffs: Vec<Difference>) {
+    let mut table = Table::new();
+	table.add_row(row!["L1", "Same", "L2"]);
+	for d in diffs {
+		match d {
+			Same(line) => table.add_row(row!["", line, ""]),
+			Add(line) => table.add_row(row![line, "", ""]),
+			Rem(line) => table.add_row(row!["", "", line]),
+		};
+	}
+    table.printstd();
 }
 
 fn main() {
@@ -67,4 +85,10 @@ fn main() {
     let changeset = Changeset::new(&s1, &s2, "\n");
     println!("Newline");
     println!("{}", changeset);
+
+    for c in &changeset.diffs {
+        println!("{:?}", c);
+    }
+
+    print_results(changeset.diffs);
 }
