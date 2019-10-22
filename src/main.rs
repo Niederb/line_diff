@@ -47,8 +47,8 @@ fn print_results(diffs: Vec<Difference>) {
 	for d in diffs {
 		match d {
 			Same(line) => table.add_row(row!["", line, ""]),
-			Add(line) => table.add_row(row![line, "", ""]),
-			Rem(line) => table.add_row(row!["", "", line]),
+			Add(line) => table.add_row(row!["", "", line]),
+			Rem(line) => table.add_row(row![line, "", ""]),
 		};
 	}
     table.printstd();
