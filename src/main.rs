@@ -1,24 +1,70 @@
 extern crate difference;
+#[macro_use]
+extern crate clap;
+
+use clap::{App, Arg};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+use difference::Changeset;
+use difference::Difference;
+
+fn get_lines_from_file(filename: &str) -> (String, String) {
+    let file = File::open(filename).unwrap();
+    let reader = BufReader::new(file);
+
+    let mut s1 = "".to_owned();
+    let mut s2 = "".to_owned();
+    for (index, line) in reader.lines().enumerate() {
+        let line = line.unwrap();
+
+        if (index == 0) {
+            s1 = line.to_owned();
+        } else if (index == 1) {
+            s2 = line.to_owned();
+        } else {
+            println!("File contains additional lines that will be ignored");
+            break;
+        }
+    }
+    (s1.to_string(), s2.to_string())
+}
+
+fn get_lines_from_cmd() -> (String, String) {
+    //let mut buffer = String::new();
+    //io::stdin().read_to_string(&mut buffer)?;
+    ("".to_owned(), "".to_owned())
+}
 
 fn main() {
-	use difference::Changeset;
-	use difference::Difference;
+    let matches = App::new("Line diff")
+        .version(crate_version!())
+        .author("Thomas Niederberger <thomas@niederb.ch>")
+        .about("Compare two lines")
+        .arg(
+            Arg::with_name("file")
+                .short("f")
+                .help("File containing the two lines to compare")
+                .takes_value(true),
+        )
+        .get_matches();
 
-	let s1 = "set(OpenCV_COMPUTE_CAPABILITIES -gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_61,code=compute_61;-gencode;arch=compute_75,code=compute_75)";
-	let s2 = "set(OpenCV_COMPUTE_CAPABILITIES -gencode;arch=compute_52,code=sm_52;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_52,code=compute_52;-gencode;arch=compute_61,code=compute_61;-gencode;arch=compute_70,code=compute_70;-gencode;arch=compute_75,code=compute_75)";
+    let (s1, s2) = if matches.is_present("file") {
+        let input_file = matches.value_of("file").unwrap_or("");
+        get_lines_from_file(input_file)
+    } else {
+        get_lines_from_cmd()
+    };
 
-	let separator = ";";
-	let s1 = s1.replace(separator, "\n");
-	let s2 = s2.replace(separator, "\n");
+    let separator = ";";
+    let s1 = s1.replace(separator, "\n");
+    let s2 = s2.replace(separator, "\n");
 
-	let separator = ",";
-	let s1 = s1.replace(separator, "\n");
-	let s2 = s2.replace(separator, "\n");
+    let separator = ",";
+    let s1 = s1.replace(separator, "\n");
+    let s2 = s2.replace(separator, "\n");
 
-	let changeset = Changeset::new(&s1, &s2, "\n");
-	println!("Newline");
-	println!("{}", changeset);
-
-
-
+    let changeset = Changeset::new(&s1, &s2, "\n");
+    println!("Newline");
+    println!("{}", changeset);
 }

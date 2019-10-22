@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 difference = "2.0"
+clap = "2.33.0"
