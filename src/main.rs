@@ -4,6 +4,7 @@ extern crate clap;
 
 use clap::{App, Arg};
 use std::fs::File;
+use std::io;
 use std::io::{BufRead, BufReader};
 
 use difference::Changeset;
@@ -53,10 +54,11 @@ fn get_lines_from_file(filename: &str) -> (String, String) {
     (s1.to_string(), s2.to_string())
 }
 
-fn get_lines_from_cmd() -> (String, String) {
-    //let mut buffer = String::new();
-    //io::stdin().read_to_string(&mut buffer)?;
-    ("".to_owned(), "".to_owned())
+fn get_line_from_cmd(string_number: i32) -> String {
+    println!("Please provide line #{}: ", string_number);
+	let mut buffer = String::new();
+    io::stdin().read_line(&mut buffer).expect("");
+    buffer
 }
 
 fn print_results(diffs: Vec<Difference>) {
@@ -75,7 +77,7 @@ fn print_results(diffs: Vec<Difference>) {
 fn main() {
     let matches = App::new("Line diff")
         .version(crate_version!())
-        .author("Thomas Niederberger <thomas@niederb.ch>")
+        .author(crate_authors!())
         .about("Compare two lines")
         .arg(
             Arg::with_name("file")
@@ -103,7 +105,7 @@ fn main() {
         )
         .get_matches();
 
-    let (s1, s2) = if matches.is_present("file") {
+    let (mut s1, mut s2) = if matches.is_present("file") {
         let input_file = matches.value_of("file").unwrap_or("");
         get_lines_from_file(input_file)
     } else if matches.is_present("file1") && matches.is_present("file2") {
@@ -113,14 +115,16 @@ fn main() {
         let s2 = get_line_from_file(input_file);
 		(s1, s2)
 	} else {
-        get_lines_from_cmd()
-    };
+		("".to_owned(), "".to_owned())
+	};
+	if s1.len() == 0 {
+		s1 = get_line_from_cmd(1);
+	}
+	if s2.len() == 0 {
+		s2 = get_line_from_cmd(2);
+	}
 
     let separator = matches.value_of("separator").unwrap_or(";");
-    let s1 = s1.replace(separator, "\n");
-    let s2 = s2.replace(separator, "\n");
-
-    let separator = ",";
     let s1 = s1.replace(separator, "\n");
     let s2 = s2.replace(separator, "\n");
 
