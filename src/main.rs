@@ -13,7 +13,7 @@ use difference::Difference::{Add, Rem, Same};
 
 #[macro_use]
 extern crate prettytable;
-use prettytable::{Cell, Row, Table};
+use prettytable::Table;
 
 fn get_line_from_file(filename: &str) -> String {
     let file = File::open(filename).unwrap();
@@ -81,6 +81,12 @@ fn print_results(diffs: Vec<Difference>) {
     table.printstd();
 }
 
+fn sort_chunks(s: &str, separator: &str) -> String {
+    let mut chunks: Vec<&str> = s.split(separator).collect();
+    chunks.sort();
+    chunks.join("\n")
+}
+
 fn main() {
     let matches = App::new("Line diff")
         .version(crate_version!())
@@ -112,26 +118,23 @@ fn main() {
         )
         .get_matches();
 
-    let (mut s1, mut s2) = if matches.is_present("file") {
+    let (s1, s2) = if matches.is_present("file") {
         let input_file = matches.value_of("file").unwrap_or("");
         get_lines_from_file(input_file)
     } else {
         let s1 = get_line(1, matches.value_of("file1"));
-        let s2 = get_line(1, matches.value_of("file1"));
+        let s2 = get_line(1, matches.value_of("file2"));
         (s1, s2)
     };
 
+    println!("Line 1: \n{}", s1);
+    println!("Line 2: \n{}", s2);
+
     let separator = matches.value_of("separator").unwrap_or(";");
-    let s1 = s1.replace(separator, "\n");
-    let s2 = s2.replace(separator, "\n");
+
+    let s1 = sort_chunks(&s1, &separator);
+    let s2 = sort_chunks(&s2, &separator);
 
     let changeset = Changeset::new(&s1, &s2, "\n");
-    println!("Newline");
-    println!("{}", changeset);
-
-    for c in &changeset.diffs {
-        println!("{:?}", c);
-    }
-
     print_results(changeset.diffs);
 }
