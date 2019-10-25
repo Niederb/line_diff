@@ -81,9 +81,11 @@ fn print_results(diffs: Vec<Difference>) {
     table.printstd();
 }
 
-fn sort_chunks(s: &str, separator: &str) -> String {
+fn preprocess_chunks(s: &str, separator: &str, sort: bool) -> String {
     let mut chunks: Vec<&str> = s.split(separator).collect();
-    chunks.sort();
+    if sort {
+        chunks.sort();
+    }
     chunks.join("\n")
 }
 
@@ -116,6 +118,11 @@ fn main() {
                 .help("Separator for splitting lines")
                 .takes_value(true),
         )
+        .arg(
+            Arg::with_name("sorted")
+                .short("o")
+                .help("Whether or not the values should be sorted"),
+        )
         .get_matches();
 
     let (s1, s2) = if matches.is_present("file") {
@@ -126,14 +133,15 @@ fn main() {
         let s2 = get_line(1, matches.value_of("file2"));
         (s1, s2)
     };
+    let separator = matches.value_of("separator").unwrap_or(";");
+    let sort = matches.is_present("sorted");
 
+    println!("Separator: \n{}", separator);
     println!("Line 1: \n{}", s1);
     println!("Line 2: \n{}", s2);
 
-    let separator = matches.value_of("separator").unwrap_or(";");
-
-    let s1 = sort_chunks(&s1, &separator);
-    let s2 = sort_chunks(&s2, &separator);
+    let s1 = preprocess_chunks(&s1, &separator, sort);
+    let s2 = preprocess_chunks(&s2, &separator, sort);
 
     let changeset = Changeset::new(&s1, &s2, "\n");
     print_results(changeset.diffs);
