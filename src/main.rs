@@ -81,8 +81,8 @@ fn print_results(diffs: Vec<Difference>) {
     table.printstd();
 }
 
-fn preprocess_chunks(s: &str, separator: &str, sort: bool) -> String {
-    let mut chunks: Vec<&str> = s.split(separator).collect();
+fn preprocess_chunks(s: &str, separator: &[char], sort: bool) -> String {
+    let mut chunks: Vec<&str> = s.split(|c| separator.contains(&c)).collect();
     if sort {
         chunks.sort();
     }
@@ -116,7 +116,8 @@ fn main() {
             Arg::with_name("separator")
                 .short("s")
                 .help("Separator for splitting lines")
-                .takes_value(true),
+                .takes_value(true)
+                .multiple(true),
         )
         .arg(
             Arg::with_name("sorted")
@@ -133,15 +134,27 @@ fn main() {
         let s2 = get_line(1, matches.value_of("file2"));
         (s1, s2)
     };
-    let separator = matches.value_of("separator").unwrap_or(";");
+
     let sort = matches.is_present("sorted");
 
-    println!("Separator: \n{}", separator);
+    let separator_chars = if matches.is_present("separator") {
+        let separators = matches.values_of("separator").unwrap().collect::<Vec<_>>();
+        let mut separator_chars:Vec<char> = Vec::new();
+        for s in separators {
+            println!("Separator: '{}'", s);
+            if let Some(character) = s.chars().nth(0) {
+                separator_chars.push(character);
+            }
+        }
+        separator_chars
+    } else {
+        vec![' ', ]
+    };
     println!("Line 1: \n{}", s1);
     println!("Line 2: \n{}", s2);
 
-    let s1 = preprocess_chunks(&s1, &separator, sort);
-    let s2 = preprocess_chunks(&s2, &separator, sort);
+    let s1 = preprocess_chunks(&s1, &separator_chars, sort);
+    let s2 = preprocess_chunks(&s2, &separator_chars, sort);
 
     let changeset = Changeset::new(&s1, &s2, "\n");
     print_results(changeset.diffs);
