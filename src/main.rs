@@ -159,3 +159,17 @@ fn main() {
     let changeset = Changeset::new(&s1, &s2, "\n");
     print_results(changeset.diffs);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn it_works() {
+        let output = preprocess_chunks("hello world", &vec![' '], false);
+        assert_eq!("hello\nworld", output);
+        let output = preprocess_chunks("hello world", &vec![';'], false);
+        assert_eq!("hello world", output);
+        let output = preprocess_chunks("hello world", &vec!['o'], false);
+        assert_eq!("hell\n w\nrld", output);
+    }
+}
