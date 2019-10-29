@@ -58,7 +58,7 @@ fn get_line_from_cmd(line_number: i32) -> String {
     println!("Please provide line #{}: ", line_number);
     let mut buffer = String::new();
     io::stdin().read_line(&mut buffer).expect("");
-    buffer
+    buffer.trim().to_string()
 }
 
 fn get_line(line_number: i32, filename: Option<&str>) -> String {
@@ -164,12 +164,20 @@ fn main() {
 mod tests {
     use super::*;
     #[test]
-    fn it_works() {
+    fn preprocess_no_sorting() {
         let output = preprocess_chunks("hello world", &vec![' '], false);
         assert_eq!("hello\nworld", output);
         let output = preprocess_chunks("hello world", &vec![';'], false);
         assert_eq!("hello world", output);
         let output = preprocess_chunks("hello world", &vec!['o'], false);
         assert_eq!("hell\n w\nrld", output);
+    }
+
+    #[test]
+    fn preprocess_sorting() {
+        let output = preprocess_chunks("a b c", &vec![' '], true);
+        assert_eq!("a\nb\nc", output);
+        let output = preprocess_chunks("c b a", &vec![' '], true);
+        assert_eq!("a\nb\nc", output);
     }
 }
