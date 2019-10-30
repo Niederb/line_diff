@@ -95,20 +95,12 @@ fn main() {
         .author(crate_authors!())
         .about("Compare two lines")
         .arg(
-            Arg::with_name("file")
-                .short("f")
-                .help("File containing the two lines to compare")
-                .takes_value(true),
-        )
-        .arg(
             Arg::with_name("file1")
-                .short("x")
                 .help("File containing the first line for comparison")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("file2")
-                .short("y")
                 .help("File containing the second line for comparison")
                 .takes_value(true),
         )
@@ -122,16 +114,20 @@ fn main() {
         .arg(
             Arg::with_name("sorted")
                 .short("o")
-                .help("Whether or not the values should be sorted"),
+                .help("Whether or not the values should be sorted before comparing."),
         )
         .get_matches();
 
-    let (s1, s2) = if matches.is_present("file") {
-        let input_file = matches.value_of("file").unwrap_or("");
-        get_lines_from_file(input_file)
-    } else {
+    let (s1, s2) = if matches.is_present("file1") && matches.is_present("file2") {
         let s1 = get_line(1, matches.value_of("file1"));
         let s2 = get_line(1, matches.value_of("file2"));
+        (s1, s2)
+    } else if matches.is_present("file1") {
+        let input_file = matches.value_of("file1").unwrap_or("");
+        get_lines_from_file(input_file)
+    } else {
+        let s1 = get_line(1, None);
+        let s2 = get_line(2, None);
         (s1, s2)
     };
 
@@ -178,6 +174,14 @@ mod tests {
         let output = preprocess_chunks("a b c", &vec![' '], true);
         assert_eq!("a\nb\nc", output);
         let output = preprocess_chunks("c b a", &vec![' '], true);
+        assert_eq!("a\nb\nc", output);
+    }
+
+    #[test]
+    fn preprocess_multiple_separators() {
+        let output = preprocess_chunks("a b;c", &vec![' '], true);
+        assert_eq!("a\nb;c", output);
+        let output = preprocess_chunks("c b a", &vec![' ', ';'], true);
         assert_eq!("a\nb\nc", output);
     }
 }
