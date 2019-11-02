@@ -93,7 +93,7 @@ fn main() {
     let matches = App::new("Line diff")
         .version(crate_version!())
         .author(crate_authors!())
-        .about("Compare two lines")
+        .about("Compare two lines by splitting the lines into smaller chunks.")
         .arg(
             Arg::with_name("file1")
                 .help("File containing the first line for comparison")
@@ -183,5 +183,18 @@ mod tests {
         assert_eq!("a\nb;c", output);
         let output = preprocess_chunks("c b a", &vec![' ', ';'], true);
         assert_eq!("a\nb\nc", output);
+    }
+
+    #[test]
+    fn read_one_line() {
+        let l1 = get_line_from_file("test.txt");
+        assert_eq!("Hello world 1 3 .", l1);
+    }
+
+    #[test]
+    fn read_two_lines() {
+        let (l1, l2) = get_lines_from_file("test.txt");
+        assert_eq!("Hello world 1 3 .", l1);
+        assert_eq!("as the %+3^ night", l2);
     }
 }
