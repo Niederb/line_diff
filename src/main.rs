@@ -138,7 +138,7 @@ fn main() {
         let mut separator_chars:Vec<char> = Vec::new();
         for s in separators {
             println!("Separator: '{}'", s);
-            if let Some(character) = s.chars().nth(0) {
+            for character in s.chars() {
                 separator_chars.push(character);
             }
         }
