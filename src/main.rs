@@ -6,6 +6,7 @@ use clap::{App, Arg};
 use std::fs::File;
 use std::io;
 use std::io::{BufRead, BufReader};
+use std::path::Path;
 
 use difference::Changeset;
 use difference::Difference;
@@ -15,7 +16,7 @@ use difference::Difference::{Add, Rem, Same};
 extern crate prettytable;
 use prettytable::Table;
 
-fn get_line_from_file(filename: &str) -> String {
+fn get_line_from_file(filename: &Path) -> String {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
 
@@ -33,7 +34,7 @@ fn get_line_from_file(filename: &str) -> String {
     s.to_string()
 }
 
-fn get_lines_from_file(filename: &str) -> (String, String) {
+fn get_lines_from_file(filename: &Path) -> (String, String) {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
 
@@ -61,9 +62,9 @@ fn get_line_from_cmd(line_number: i32) -> String {
     buffer.trim().to_string()
 }
 
-fn get_line(line_number: i32, filename: Option<&str>) -> String {
-    match filename {
-        Some(filename) => get_line_from_file(filename),
+fn get_line(line_number: i32, filepath: Option<&Path>) -> String {
+    match filepath {
+        Some(filepath) => get_line_from_file(filepath),
         None => get_line_from_cmd(line_number),
     }
 }
@@ -118,13 +119,24 @@ fn main() {
         )
         .get_matches();
 
-    let (s1, s2) = if matches.is_present("file1") && matches.is_present("file2") {
-        let s1 = get_line(1, matches.value_of("file1"));
-        let s2 = get_line(1, matches.value_of("file2"));
-        (s1, s2)
-    } else if matches.is_present("file1") {
-        let input_file = matches.value_of("file1").unwrap_or("");
-        get_lines_from_file(input_file)
+    let (s1, s2) = if let Some(filepath1) = matches.value_of("file1") {
+        let path_file1 = Path::new(filepath1);
+        if !path_file1.exists() || !path_file1.is_file() {
+            println!("Cannot find file1: {}", filepath1);
+            return;
+        }
+        if let Some(filepath2) = matches.value_of("file2") {
+            let path_file2 = Path::new(filepath2);
+            if !path_file2.exists() || !path_file2.is_file() {
+                println!("Cannot find file1: {}", filepath2);
+                return;
+            }
+            let s1 = get_line(1, Some(path_file1));
+            let s2 = get_line(1, Some(path_file2));
+            (s1, s2)
+        } else {
+            get_lines_from_file(path_file1)
+        }
     } else {
         let s1 = get_line(1, None);
         let s2 = get_line(2, None);
@@ -135,7 +147,7 @@ fn main() {
 
     let separator_chars = if matches.is_present("separator") {
         let separators = matches.values_of("separator").unwrap().collect::<Vec<_>>();
-        let mut separator_chars:Vec<char> = Vec::new();
+        let mut separator_chars: Vec<char> = Vec::new();
         for s in separators {
             println!("Separator: '{}'", s);
             for character in s.chars() {
@@ -144,7 +156,7 @@ fn main() {
         }
         separator_chars
     } else {
-        vec![' ', ]
+        vec![' ']
     };
     println!("Line 1: \n{}", s1);
     println!("Line 2: \n{}", s2);
@@ -187,13 +199,13 @@ mod tests {
 
     #[test]
     fn read_one_line() {
-        let l1 = get_line_from_file("test.txt");
+        let l1 = get_line_from_file(Path::new("test.txt"));
         assert_eq!("Hello world 1 3 .", l1);
     }
 
     #[test]
     fn read_two_lines() {
-        let (l1, l2) = get_lines_from_file("test.txt");
+        let (l1, l2) = get_lines_from_file(Path::new("test.txt"));
         assert_eq!("Hello world 1 3 .", l1);
         assert_eq!("as the %+3^ night", l2);
     }
