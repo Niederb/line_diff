@@ -94,7 +94,7 @@ fn main() {
     let matches = App::new("Line diff")
         .version(crate_version!())
         .author(crate_authors!())
-        .about("Compare two lines by splitting the lines into smaller chunks.")
+        .about("Compare two lines by splitting the lines into smaller chunks and comparing the chunks.")
         .arg(
             Arg::with_name("file1")
                 .help("File containing the first line for comparison")
@@ -108,14 +108,14 @@ fn main() {
         .arg(
             Arg::with_name("separator")
                 .short("s")
-                .help("Separator for splitting lines")
+                .help("Separator for splitting lines. It is possible to define multiple separators.")
                 .takes_value(true)
                 .multiple(true),
         )
         .arg(
             Arg::with_name("sorted")
                 .short("o")
-                .help("Whether or not the values should be sorted before comparing."),
+                .help("Whether or not the chunks should be sorted before comparing."),
         )
         .get_matches();
 
