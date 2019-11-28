@@ -13,7 +13,8 @@ This is handy for cases such as compiler flags where the ordering does not matte
 line_diff l1.txt l2.txt -o
 ```
 
-Compare two lines from two a single input file. With the -o option the chunks will be sorted before comparison.
+Compare two lines from two a single input file and with sorting of the chunks. 
+Specify two different separators (' ' and ';') with the -s option
 ```
-line_diff l1.txt -o
+line_diff l1.txt -o -s "; "
 ```
