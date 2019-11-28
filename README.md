@@ -1,6 +1,29 @@
 # line_diff
 Tool to make a diff between to single lines
 
+## Example output
+```
+Line 1:
+a b c d e f
+Line 2:
+b d f e c2
++----+------+----+
+| L1 | Same | L2 |
++----+------+----+
+| a  |      |    |
++----+------+----+
+|    | b    |    |
++----+------+----+
+| c  |      |    |
++----+------+----+
+|    |      | c2 |
++----+------+----+
+|    | d    |    |
+|    | e    |    |
+|    | f    |    |
++----+------+----+
+```
+
 ## Examples
 Compare two lines from two different input files.
 ```
