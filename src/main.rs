@@ -115,6 +115,18 @@ fn main() {
                 .help("File containing the second line for comparison")
                 .takes_value(true),
         )
+                .arg(
+            Arg::with_name("line1")
+                .long("line1")
+                .help("File containing the first line for comparison")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("line2")
+                .long("line2")
+                .help("File containing the second line for comparison")
+                .takes_value(true),
+        )
         .arg(
             Arg::with_name("separator")
                 .short("s")
@@ -137,8 +149,16 @@ fn main() {
         }
         get_lines_from_file(path_file)
     } else {
-        let l1 = get_line(1, matches.value_of("file1"));
-        let l2 = get_line(2, matches.value_of("file2"));
+        let l1 = if let Some(l1) = matches.value_of("line1") {
+            l1.to_owned()
+        } else {
+            get_line(1, matches.value_of("file1"))
+        };
+        let l2 = if let Some(l2) = matches.value_of("line2") {
+            l2.to_owned()
+        } else {
+            get_line(2, matches.value_of("file2"))
+        };
         (l1, l2)
     };
 
