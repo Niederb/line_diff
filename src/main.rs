@@ -17,6 +17,10 @@ extern crate prettytable;
 use prettytable::Table;
 
 fn get_line_from_file(filename: &Path) -> String {
+    if !filename.exists() || !filename.is_file() {
+        println!("Cannot find file1: {:?}", filename);
+        return "".to_string();
+    }
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
 
@@ -62,9 +66,9 @@ fn get_line_from_cmd(line_number: i32) -> String {
     buffer.trim().to_string()
 }
 
-fn get_line(line_number: i32, filepath: Option<&Path>) -> String {
+fn get_line(line_number: i32, filepath: Option<&str>) -> String {
     match filepath {
-        Some(filepath) => get_line_from_file(filepath),
+        Some(filepath) => get_line_from_file(Path::new(filepath)),
         None => get_line_from_cmd(line_number),
     }
 }
@@ -96,6 +100,12 @@ fn main() {
         .author(crate_authors!())
         .about("Compare two lines by splitting the lines into smaller chunks and comparing the chunks.")
         .arg(
+            Arg::with_name("file")
+                .help("A single file containing two lines")
+                .short("f")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("file1")
                 .help("File containing the first line for comparison")
                 .takes_value(true),
@@ -119,28 +129,17 @@ fn main() {
         )
         .get_matches();
 
-    let (s1, s2) = if let Some(filepath1) = matches.value_of("file1") {
-        let path_file1 = Path::new(filepath1);
-        if !path_file1.exists() || !path_file1.is_file() {
-            println!("Cannot find file1: {}", filepath1);
+    let (s1, s2) = if let Some(filepath) = matches.value_of("file") {
+        let path_file = Path::new(filepath);
+        if !path_file.exists() || !path_file.is_file() {
+            println!("Cannot find file1: {}", filepath);
             return;
         }
-        if let Some(filepath2) = matches.value_of("file2") {
-            let path_file2 = Path::new(filepath2);
-            if !path_file2.exists() || !path_file2.is_file() {
-                println!("Cannot find file1: {}", filepath2);
-                return;
-            }
-            let s1 = get_line(1, Some(path_file1));
-            let s2 = get_line(1, Some(path_file2));
-            (s1, s2)
-        } else {
-            get_lines_from_file(path_file1)
-        }
+        get_lines_from_file(path_file)
     } else {
-        let s1 = get_line(1, None);
-        let s2 = get_line(2, None);
-        (s1, s2)
+        let l1 = get_line(1, matches.value_of("file1"));
+        let l2 = get_line(2, matches.value_of("file2"));
+        (l1, l2)
     };
 
     let sort = matches.is_present("sorted");
