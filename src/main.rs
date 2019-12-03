@@ -75,7 +75,7 @@ fn get_line(line_number: i32, filepath: Option<&str>) -> String {
 
 fn print_results(diffs: Vec<Difference>) {
     let mut table = Table::new();
-    table.add_row(row!["L1", "Same", "L2"]);
+    table.add_row(row!["Line 1", "Same", "Line 2"]);
     for d in diffs {
         match d {
             Same(line) => table.add_row(row!["", line, ""]),
