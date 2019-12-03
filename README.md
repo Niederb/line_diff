@@ -39,5 +39,10 @@ line_diff l1.txt l2.txt -o
 Compare two lines from two a single input file and with sorting of the chunks. 
 Specify two different separators (' ' and ';') with the -s option
 ```
-line_diff l1.txt -o -s "; "
+line_diff --file l1.txt -o -s "; "
+```
+
+Compare two lines by specifying the string on the command line
+```
+line_diff --line1 "hello world" --line2 "hello there"
 ```

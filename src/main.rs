@@ -98,33 +98,36 @@ fn main() {
     let matches = App::new("Line diff")
         .version(crate_version!())
         .author(crate_authors!())
-        .about("Compare two lines by splitting the lines into smaller chunks and comparing the chunks.")
+        .about("Compare two lines by splitting the lines into smaller chunks and comparing the chunks. \
+        There are multiple ways of specifying the two lines: \n \
+        \ta single file that contains the two lines (--file option) \n \
+        \tspecifying the two lines separately as a file path (indexed argument 1 and 2), on the command line (--line1 and --line2) or using command line input.")
         .arg(
             Arg::with_name("file")
-                .help("A single file containing two lines")
+                .help("A single file containing two lines. Remaining lines will be ignored.")
                 .short("f")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("file1")
-                .help("File containing the first line for comparison")
+                .help("Path to file containing the first line. Remaining lines will be ignored.")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("file2")
-                .help("File containing the second line for comparison")
+                .help("Path to file containing the second line. Remaining lines will be ignored.")
                 .takes_value(true),
         )
-                .arg(
+        .arg(
             Arg::with_name("line1")
                 .long("line1")
-                .help("File containing the first line for comparison")
+                .help("First line as string")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("line2")
                 .long("line2")
-                .help("File containing the second line for comparison")
+                .help("Second line as string")
                 .takes_value(true),
         )
         .arg(
