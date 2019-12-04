@@ -37,11 +37,19 @@ impl LineData {
     }
 }
 
-fn get_line_from_file(path: &Path) -> Result<LineData> {
-    if !path.exists() || !path.is_file() {
-        println!("Cannot find file1: {:?}", path);
-        return Err("".into());
+fn verify_existing_file(path: &Path) -> Result<()> {
+    if !path.exists() {
+        Err(format!("Cannot find file1: {}", path.display()).into())
+    } else if !path.is_file() {
+        Err(format!("Is not a file: {}", path.display()).into())
+    } else {
+        Ok(())
     }
+}
+
+fn get_line_from_file(path: &Path) -> Result<LineData> {
+    verify_existing_file(path)?;
+
     let file = File::open(path)?;
     let reader = BufReader::new(file);
 
@@ -68,8 +76,10 @@ fn get_line_from_file(path: &Path) -> Result<LineData> {
     Ok(LineData::new(&file_name, &s))
 }
 
-fn get_lines_from_file(filename: &Path) -> Result<(LineData, LineData)> {
-    let file = File::open(filename).unwrap();
+fn get_lines_from_file(path: &Path) -> Result<(LineData, LineData)> {
+    verify_existing_file(path)?;
+
+    let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
 
     let mut s1 = "".to_owned();
@@ -180,10 +190,7 @@ fn main() -> Result<()> {
 
     let (s1, s2) = if let Some(filepath) = matches.value_of("file") {
         let path_file = Path::new(filepath);
-        if !path_file.exists() || !path_file.is_file() {
-            println!("Cannot find file1: {}", filepath);
-            return Err("File not found".into());
-        }
+        verify_existing_file(path_file)?;
         get_lines_from_file(path_file)?
     } else {
         let l1 = if let Some(l1) = matches.value_of("line1") {
