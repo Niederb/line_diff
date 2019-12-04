@@ -3,11 +3,11 @@ extern crate difference;
 extern crate clap;
 
 use clap::{App, Arg};
+use std::error;
 use std::fs::File;
 use std::io;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use std::error;
 
 use difference::Changeset;
 use difference::Difference;
@@ -26,7 +26,10 @@ struct LineData {
 
 impl LineData {
     fn new(name: &str, line: &str) -> LineData {
-        LineData { name: name.to_string(), line: line.to_string() }
+        LineData {
+            name: name.to_string(),
+            line: line.to_string(),
+        }
     }
 }
 
@@ -79,7 +82,7 @@ fn get_lines_from_file(filename: &Path) -> Result<(LineData, LineData)> {
             break;
         }
     }
-    Ok((LineData::new("Line1", &s1), LineData::new("Line2", &s2)))
+    Ok((LineData::new("Line 1", &s1), LineData::new("Line 2", &s2)))
 }
 
 fn get_line_from_cmd(line_number: i32) -> LineData {
@@ -99,7 +102,7 @@ fn get_line(line_number: i32, filepath: Option<&str>) -> Result<LineData> {
 fn print_results(name1: &str, name2: &str, diffs: Vec<Difference>) {
     let mut table = Table::new();
     table.add_row(row![name1, "Same", name2]);
-    for d in diffs.iter(){
+    for d in diffs.iter() {
         match d {
             Same(line) => table.add_row(row!["", line, ""]),
             Add(line) => table.add_row(row!["", "", line]),
@@ -244,15 +247,20 @@ mod tests {
     }
 
     #[test]
-    fn read_one_line() {
-        let l1 = get_line_from_file(Path::new("test.txt"));
-        assert_eq!("Hello world 1 3 .", l1);
+    fn read_one_line() -> Result<()> {
+        let l1 = get_line_from_file(Path::new("test.txt"))?;
+        assert_eq!("test.txt", l1.name);
+        assert_eq!("Hello world 1 3 .", l1.line);
+        Ok(())
     }
 
     #[test]
-    fn read_two_lines() {
-        let (l1, l2) = get_lines_from_file(Path::new("test.txt"));
-        assert_eq!("Hello world 1 3 .", l1);
-        assert_eq!("as the %+3^ night", l2);
+    fn read_two_lines() -> Result<()> {
+        let (l1, l2) = get_lines_from_file(Path::new("test.txt"))?;
+        assert_eq!("Line 1", l1.name);
+        assert_eq!("Line 2", l2.name);
+        assert_eq!("Hello world 1 3 .", l1.line);
+        assert_eq!("as the %+3^ night", l2.line);
+        Ok(())
     }
 }
