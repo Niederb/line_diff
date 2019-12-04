@@ -130,6 +130,7 @@ fn main() -> Result<()> {
         \tspecifying the two lines separately as a file path (indexed argument 1 and 2), on the command line (--line1 and --line2) or using command line input.")
         .arg(
             Arg::with_name("file")
+                .long("file")    
                 .help("A single file containing two lines. Remaining lines will be ignored.")
                 .short("f")
                 .takes_value(true),
@@ -146,12 +147,14 @@ fn main() -> Result<()> {
         )
         .arg(
             Arg::with_name("line1")
+                .short("x")
                 .long("line1")
                 .help("First line as string")
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("line2")
+                .short("y")
                 .long("line2")
                 .help("Second line as string")
                 .takes_value(true),
