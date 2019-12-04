@@ -31,6 +31,10 @@ impl LineData {
             line: line.to_string(),
         }
     }
+
+    fn length(&self) -> usize {
+        self.line.chars().count()
+    }
 }
 
 fn get_line_from_file(path: &Path) -> Result<LineData> {
@@ -99,9 +103,9 @@ fn get_line(line_number: i32, filepath: Option<&str>) -> Result<LineData> {
     }
 }
 
-fn print_results(name1: &str, name2: &str, diffs: Vec<Difference>) {
+fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     let mut table = Table::new();
-    table.add_row(row![name1, "Same", name2]);
+    table.add_row(row![bFgc => l1.name, "Same", l2.name]);
     for d in diffs.iter() {
         match d {
             Same(line) => table.add_row(row!["", line, ""]),
@@ -109,6 +113,7 @@ fn print_results(name1: &str, name2: &str, diffs: Vec<Difference>) {
             Rem(line) => table.add_row(row![line, "", ""]),
         };
     }
+    table.add_row(row![bFgc => l1.length(), "Characters", l2.length()]);
     table.printstd();
 }
 
@@ -216,7 +221,7 @@ fn main() -> Result<()> {
     let l2 = preprocess_chunks(&s2.line, &separator_chars, sort);
 
     let changeset = Changeset::new(&l1, &l2, "\n");
-    print_results(&s1.name, &s2.name, changeset.diffs);
+    print_results(&s1, &s2, changeset.diffs);
     Ok(())
 }
 
