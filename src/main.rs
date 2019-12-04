@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use std::error;
 
 use difference::Changeset;
 use difference::Difference;
@@ -16,17 +17,30 @@ use difference::Difference::{Add, Rem, Same};
 extern crate prettytable;
 use prettytable::Table;
 
-fn get_line_from_file(filename: &Path) -> String {
-    if !filename.exists() || !filename.is_file() {
-        println!("Cannot find file1: {:?}", filename);
-        return "".to_string();
+type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+struct LineData {
+    name: String,
+    line: String,
+}
+
+impl LineData {
+    fn new(name: &str, line: &str) -> LineData {
+        LineData { name: name.to_string(), line: line.to_string() }
     }
-    let file = File::open(filename).unwrap();
+}
+
+fn get_line_from_file(path: &Path) -> Result<LineData> {
+    if !path.exists() || !path.is_file() {
+        println!("Cannot find file1: {:?}", path);
+        return Err("".into());
+    }
+    let file = File::open(path)?;
     let reader = BufReader::new(file);
 
     let mut s = "".to_owned();
     for (index, line) in reader.lines().enumerate() {
-        let line = line.unwrap();
+        let line = line?;
 
         if index == 0 {
             s = line.to_owned();
@@ -35,10 +49,19 @@ fn get_line_from_file(filename: &Path) -> String {
             break;
         }
     }
-    s.to_string()
+    let file_name = if let Some(file_name2) = path.file_name() {
+        if let Ok(file_name3) = file_name2.to_os_string().into_string() {
+            file_name3
+        } else {
+            "".into()
+        }
+    } else {
+        "".into()
+    };
+    Ok(LineData::new(&file_name, &s))
 }
 
-fn get_lines_from_file(filename: &Path) -> (String, String) {
+fn get_lines_from_file(filename: &Path) -> Result<(LineData, LineData)> {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
 
@@ -56,27 +79,27 @@ fn get_lines_from_file(filename: &Path) -> (String, String) {
             break;
         }
     }
-    (s1.to_string(), s2.to_string())
+    Ok((LineData::new("Line1", &s1), LineData::new("Line2", &s2)))
 }
 
-fn get_line_from_cmd(line_number: i32) -> String {
+fn get_line_from_cmd(line_number: i32) -> LineData {
     println!("Please provide line #{}: ", line_number);
     let mut buffer = String::new();
     io::stdin().read_line(&mut buffer).expect("");
-    buffer.trim().to_string()
+    LineData::new(&format!("Line {}", line_number), &buffer.trim().to_string())
 }
 
-fn get_line(line_number: i32, filepath: Option<&str>) -> String {
+fn get_line(line_number: i32, filepath: Option<&str>) -> Result<LineData> {
     match filepath {
         Some(filepath) => get_line_from_file(Path::new(filepath)),
-        None => get_line_from_cmd(line_number),
+        None => Ok(get_line_from_cmd(line_number)),
     }
 }
 
-fn print_results(diffs: Vec<Difference>) {
+fn print_results(name1: &str, name2: &str, diffs: Vec<Difference>) {
     let mut table = Table::new();
-    table.add_row(row!["Line 1", "Same", "Line 2"]);
-    for d in diffs {
+    table.add_row(row![name1, "Same", name2]);
+    for d in diffs.iter(){
         match d {
             Same(line) => table.add_row(row!["", line, ""]),
             Add(line) => table.add_row(row!["", "", line]),
@@ -94,7 +117,7 @@ fn preprocess_chunks(s: &str, separator: &[char], sort: bool) -> String {
     chunks.join("\n")
 }
 
-fn main() {
+fn main() -> Result<()> {
     let matches = App::new("Line diff")
         .version(crate_version!())
         .author(crate_authors!())
@@ -148,19 +171,19 @@ fn main() {
         let path_file = Path::new(filepath);
         if !path_file.exists() || !path_file.is_file() {
             println!("Cannot find file1: {}", filepath);
-            return;
+            return Err("File not found".into());
         }
-        get_lines_from_file(path_file)
+        get_lines_from_file(path_file)?
     } else {
         let l1 = if let Some(l1) = matches.value_of("line1") {
-            l1.to_owned()
+            LineData::new("Line 1", &l1)
         } else {
-            get_line(1, matches.value_of("file1"))
+            get_line(1, matches.value_of("file1"))?
         };
         let l2 = if let Some(l2) = matches.value_of("line2") {
-            l2.to_owned()
+            LineData::new("Line 2", &l2)
         } else {
-            get_line(2, matches.value_of("file2"))
+            get_line(2, matches.value_of("file2"))?
         };
         (l1, l2)
     };
@@ -180,14 +203,15 @@ fn main() {
     } else {
         vec![' ']
     };
-    println!("Line 1: \n{}", s1);
-    println!("Line 2: \n{}", s2);
+    println!("{}: \n{}", s1.name, s1.line);
+    println!("{}: \n{}", s1.name, s2.line);
 
-    let s1 = preprocess_chunks(&s1, &separator_chars, sort);
-    let s2 = preprocess_chunks(&s2, &separator_chars, sort);
+    let l1 = preprocess_chunks(&s1.line, &separator_chars, sort);
+    let l2 = preprocess_chunks(&s2.line, &separator_chars, sort);
 
-    let changeset = Changeset::new(&s1, &s2, "\n");
-    print_results(changeset.diffs);
+    let changeset = Changeset::new(&l1, &l2, "\n");
+    print_results(&s1.name, &s2.name, changeset.diffs);
+    Ok(())
 }
 
 #[cfg(test)]
