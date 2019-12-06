@@ -1,2 +1,2 @@
-a b c d e f
-a;d;c;d;f;b
+cargo run -- -o --file l1.txt -s " ;"
+cargo run --release -- --file l1.txt -s " ;" -o

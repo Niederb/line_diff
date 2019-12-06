@@ -244,28 +244,39 @@ mod tests {
     use super::*;
     #[test]
     fn preprocess_no_sorting() {
-        let output = preprocess_chunks("hello world", &vec![' '], false);
-        assert_eq!("hello\nworld", output);
-        let output = preprocess_chunks("hello world", &vec![';'], false);
-        assert_eq!("hello world", output);
-        let output = preprocess_chunks("hello world", &vec!['o'], false);
-        assert_eq!("hell\n w\nrld", output);
+        let mut data = LineData::new("Line 1", "hello world");
+        data.preprocess_chunks(&vec![' '], false);
+        assert_eq!("hello\nworld", data.preprocessed);
+
+        let mut data = LineData::new("Line 1", "hello world");
+        data.preprocess_chunks(&vec![';'], false);
+        assert_eq!("hello world", data.preprocessed);
+
+        let mut data = LineData::new("Line 1", "hello world");
+        data.preprocess_chunks(&vec!['o'], false);
+        assert_eq!("hell\n w\nrld", data.preprocessed);
     }
 
     #[test]
     fn preprocess_sorting() {
-        let output = preprocess_chunks("a b c", &vec![' '], true);
-        assert_eq!("a\nb\nc", output);
-        let output = preprocess_chunks("c b a", &vec![' '], true);
-        assert_eq!("a\nb\nc", output);
+        let mut data = LineData::new("Line 1", "a b c");
+        data.preprocess_chunks(&vec![' '], true);
+        assert_eq!("a\nb\nc", data.preprocessed);
+
+        let mut data = LineData::new("Line 1", "c b a");
+        data.preprocess_chunks(&vec![' '], true);
+        assert_eq!("a\nb\nc", data.preprocessed);
     }
 
     #[test]
     fn preprocess_multiple_separators() {
-        let output = preprocess_chunks("a b;c", &vec![' '], true);
-        assert_eq!("a\nb;c", output);
-        let output = preprocess_chunks("c b a", &vec![' ', ';'], true);
-        assert_eq!("a\nb\nc", output);
+        let mut data = LineData::new("Line 1", "a b;c");
+        data.preprocess_chunks(&vec![' '], true);
+        assert_eq!("a\nb;c", data.preprocessed);
+
+        let mut data = LineData::new("Line 1", "c b a");
+        data.preprocess_chunks(&vec![' ', ';'], true);
+        assert_eq!("a\nb\nc", data.preprocessed);
     }
 
     #[test]
