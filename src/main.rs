@@ -22,6 +22,7 @@ type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 struct LineData {
     name: String,
     line: String,
+    preprocessed: String,
 }
 
 impl LineData {
@@ -29,11 +30,24 @@ impl LineData {
         LineData {
             name: name.to_string(),
             line: line.to_string(),
+            preprocessed: "".to_string(),
         }
     }
 
     fn length(&self) -> usize {
         self.line.chars().count()
+    }
+
+    fn number_chunks(&self) -> usize {
+        self.preprocessed.matches('\n').count() + 1
+    }
+
+    fn preprocess_chunks(&mut self, separator: &[char], sort: bool) {
+        let mut chunks: Vec<&str> = self.line.split(|c| separator.contains(&c)).collect();
+        if sort {
+            chunks.sort();
+        }
+        self.preprocessed = chunks.join("\n");
     }
 }
 
@@ -124,15 +138,8 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
         };
     }
     table.add_row(row![bFgc => l1.length(), "Characters", l2.length()]);
+    table.add_row(row![bFgc => l1.number_chunks(), "Chunks", l2.number_chunks()]);
     table.printstd();
-}
-
-fn preprocess_chunks(s: &str, separator: &[char], sort: bool) -> String {
-    let mut chunks: Vec<&str> = s.split(|c| separator.contains(&c)).collect();
-    if sort {
-        chunks.sort();
-    }
-    chunks.join("\n")
 }
 
 fn main() -> Result<()> {
@@ -188,7 +195,7 @@ fn main() -> Result<()> {
         )
         .get_matches();
 
-    let (s1, s2) = if let Some(filepath) = matches.value_of("file") {
+    let (mut s1, mut s2) = if let Some(filepath) = matches.value_of("file") {
         let path_file = Path::new(filepath);
         verify_existing_file(path_file)?;
         get_lines_from_file(path_file)?
@@ -222,12 +229,12 @@ fn main() -> Result<()> {
         vec![' ']
     };
     println!("{}: \n{}", s1.name, s1.line);
-    println!("{}: \n{}", s1.name, s2.line);
+    println!("{}: \n{}", s2.name, s2.line);
 
-    let l1 = preprocess_chunks(&s1.line, &separator_chars, sort);
-    let l2 = preprocess_chunks(&s2.line, &separator_chars, sort);
+    s1.preprocess_chunks(&separator_chars, sort);
+    s2.preprocess_chunks(&separator_chars, sort);
 
-    let changeset = Changeset::new(&l1, &l2, "\n");
+    let changeset = Changeset::new(&s1.preprocessed, &s2.preprocessed, "\n");
     print_results(&s1, &s2, changeset.diffs);
     Ok(())
 }
