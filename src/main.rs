@@ -132,12 +132,33 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     let mut table = Table::new();
     table.set_format(*format::consts::FORMAT_BOX_CHARS);
     table.add_row(row![bFgc => l1.name, "Same", l2.name]);
-    for d in diffs.iter() {
+    let iterator = diffs.iter();
+    let mut row_index = 0;
+    let mut previous: Option<String> = None;
+    for d in iterator {
         match d {
-            Same(line) => table.add_row(row!["", line, ""]),
-            Add(line) => table.add_row(row!["", "", line]),
-            Rem(line) => table.add_row(row![line, "", ""]),
+            Same(line) => {
+                previous = None;
+                table.add_row(row!["", line, ""])
+            }
+            Add(line) => {
+                if let Some(previous_line) = previous {
+                    table.remove_row(row_index);
+                    row_index -= 1;
+                    let new_row = table.add_row(row![previous_line, "", line]);
+                    previous = None;
+                    new_row
+                } else {
+                    previous = None;
+                    table.add_row(row!["", "", line])
+                }
+            }
+            Rem(line) => {
+                previous = Some(line.to_string());
+                table.add_row(row![line, "", ""])
+            }
         };
+        row_index += 1;
     }
     table.add_row(row![bFgc => l1.length(), "Characters", l2.length()]);
     table.add_row(row![bFgc => l1.number_chunks(), "Chunks", l2.number_chunks()]);
