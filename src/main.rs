@@ -15,6 +15,7 @@ use difference::Difference::{Add, Rem, Same};
 
 #[macro_use]
 extern crate prettytable;
+use prettytable::format;
 use prettytable::Table;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -129,6 +130,7 @@ fn get_line(line_number: i32, filepath: Option<&str>) -> Result<LineData> {
 
 fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     let mut table = Table::new();
+    table.set_format(*format::consts::FORMAT_BOX_CHARS);
     table.add_row(row![bFgc => l1.name, "Same", l2.name]);
     for d in diffs.iter() {
         match d {

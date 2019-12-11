@@ -1,5 +1,9 @@
 # line_diff
-Tool to make a diff between to single lines
+Tool to make a diff between to single lines. The intended use case is to compare long lines where parts are different or missing.
+For example:
+* long command lines with many arguments and flags
+* Compiler commands with many paths (with potentially different order)
+* Long function declarations with slightly different arguments
 
 ## Example output
 ```
@@ -7,26 +11,26 @@ Line 1:
 cargo run -- -o --file l1.txt -s " ;"
 Line 2:
 cargo run --release -- --file l1.txt -s " ;" -o
-+--------+------------+-----------+
-| Line 1 |    Same    |  Line 2   |
-+--------+------------+-----------+
-|        | "          |           |
-|        | --         |           |
-|        | --file     |           |
-+--------+------------+-----------+
-|        |            | --release |
-+--------+------------+-----------+
-|        | -o         |           |
-|        | -s         |           |
-|        | ;"         |           |
-|        | cargo      |           |
-|        | l1.txt     |           |
-|        | run        |           |
-+--------+------------+-----------+
-|   37   | Characters |    47     |
-+--------+------------+-----------+
-|   9    |   Chunks   |    10     |
-+--------+------------+-----------+
+┌────────┬────────────┬───────────┐
+│ Line 1 │    Same    │  Line 2   │
+├────────┼────────────┼───────────┤
+│        │ "          │           │
+│        │ --         │           │
+│        │ --file     │           │
+├────────┼────────────┼───────────┤
+│        │            │ --release │
+├────────┼────────────┼───────────┤
+│        │ -o         │           │
+│        │ -s         │           │
+│        │ ;"         │           │
+│        │ cargo      │           │
+│        │ l1.txt     │           │
+│        │ run        │           │
+├────────┼────────────┼───────────┤
+│   37   │ Characters │    47     │
+├────────┼────────────┼───────────┤
+│   9    │   Chunks   │    10     │
+└────────┴────────────┴───────────┘
 ```
 
 ## Examples
