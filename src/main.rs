@@ -43,8 +43,13 @@ impl LineData {
         self.preprocessed.matches('\n').count() + 1
     }
 
-    fn preprocess_chunks(&mut self, separator: &[char], sort: bool) {
-        let mut chunks: Vec<&str> = self.line.split(|c| separator.contains(&c)).collect();
+    fn preprocess_chunks(&mut self, separator: &[char], sort: bool, lowercase: bool) {
+        let case_adjusted = if lowercase {
+            self.line.to_lowercase()
+        } else {
+            self.line.to_owned()
+        };
+        let mut chunks: Vec<&str> = case_adjusted.split(|c| separator.contains(&c)).collect();
         if sort {
             chunks.sort();
         }
@@ -216,6 +221,11 @@ fn main() -> Result<()> {
                 .short("o")
                 .help("Whether or not the chunks should be sorted before comparing."),
         )
+        .arg(
+            Arg::with_name("lowercase")
+                .short("l")
+                .help("Convert the chunks to lowercase before converting"),
+        )
         .get_matches();
 
     let (mut s1, mut s2) = if let Some(filepath) = matches.value_of("file") {
@@ -237,6 +247,7 @@ fn main() -> Result<()> {
     };
 
     let sort = matches.is_present("sorted");
+    let lowercase = matches.is_present("lowercase");
 
     let separator_chars = if matches.is_present("separator") {
         let separators = matches.values_of("separator").unwrap().collect::<Vec<_>>();
@@ -254,8 +265,8 @@ fn main() -> Result<()> {
     println!("{}: \n{}", s1.name, s1.line);
     println!("{}: \n{}", s2.name, s2.line);
 
-    s1.preprocess_chunks(&separator_chars, sort);
-    s2.preprocess_chunks(&separator_chars, sort);
+    s1.preprocess_chunks(&separator_chars, sort, lowercase);
+    s2.preprocess_chunks(&separator_chars, sort, lowercase);
 
     let changeset = Changeset::new(&s1.preprocessed, &s2.preprocessed, "\n");
     print_results(&s1, &s2, changeset.diffs);
@@ -268,37 +279,52 @@ mod tests {
     #[test]
     fn preprocess_no_sorting() {
         let mut data = LineData::new("Line 1", "hello world");
-        data.preprocess_chunks(&vec![' '], false);
+        data.preprocess_chunks(&vec![' '], false, false);
         assert_eq!("hello\nworld", data.preprocessed);
 
         let mut data = LineData::new("Line 1", "hello world");
-        data.preprocess_chunks(&vec![';'], false);
+        data.preprocess_chunks(&vec![';'], false, false);
         assert_eq!("hello world", data.preprocessed);
 
         let mut data = LineData::new("Line 1", "hello world");
-        data.preprocess_chunks(&vec!['o'], false);
+        data.preprocess_chunks(&vec!['o'], false, false);
+        assert_eq!("hell\n w\nrld", data.preprocessed);
+    }
+
+    #[test]
+    fn preprocess_lowercase() {
+        let mut data = LineData::new("Line 1", "hello world");
+        data.preprocess_chunks(&vec![' '], false, true);
+        assert_eq!("hello\nworld", data.preprocessed);
+
+        let mut data = LineData::new("Line 1", "Hello wOrld");
+        data.preprocess_chunks(&vec![';'], false, true);
+        assert_eq!("hello world", data.preprocessed);
+
+        let mut data = LineData::new("Line 1", "HELLO WORLD");
+        data.preprocess_chunks(&vec!['o'], false, true);
         assert_eq!("hell\n w\nrld", data.preprocessed);
     }
 
     #[test]
     fn preprocess_sorting() {
         let mut data = LineData::new("Line 1", "a b c");
-        data.preprocess_chunks(&vec![' '], true);
+        data.preprocess_chunks(&vec![' '], true, false);
         assert_eq!("a\nb\nc", data.preprocessed);
 
         let mut data = LineData::new("Line 1", "c b a");
-        data.preprocess_chunks(&vec![' '], true);
+        data.preprocess_chunks(&vec![' '], true, false);
         assert_eq!("a\nb\nc", data.preprocessed);
     }
 
     #[test]
     fn preprocess_multiple_separators() {
         let mut data = LineData::new("Line 1", "a b;c");
-        data.preprocess_chunks(&vec![' '], true);
+        data.preprocess_chunks(&vec![' '], true, false);
         assert_eq!("a\nb;c", data.preprocessed);
 
         let mut data = LineData::new("Line 1", "c b a");
-        data.preprocess_chunks(&vec![' ', ';'], true);
+        data.preprocess_chunks(&vec![' ', ';'], true, false);
         assert_eq!("a\nb\nc", data.preprocessed);
     }
 
