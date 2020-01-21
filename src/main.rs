@@ -330,7 +330,7 @@ mod tests {
 
     #[test]
     fn read_one_line() -> Result<()> {
-        let l1 = get_line_from_file(Path::new("test.txt"))?;
+        let l1 = get_line_from_file(Path::new("examples/test.txt"))?;
         assert_eq!("test.txt", l1.name);
         assert_eq!("Hello world 1 3 .", l1.line);
         Ok(())
@@ -338,7 +338,7 @@ mod tests {
 
     #[test]
     fn read_two_lines() -> Result<()> {
-        let (l1, l2) = get_lines_from_file(Path::new("test.txt"))?;
+        let (l1, l2) = get_lines_from_file(Path::new("examples/test.txt"))?;
         assert_eq!("Line 1", l1.name);
         assert_eq!("Line 2", l2.name);
         assert_eq!("Hello world 1 3 .", l1.line);

@@ -5,6 +5,13 @@ For example:
 * Compiler commands with many paths (with potentially different order)
 * Long function declarations with slightly different arguments
 
+Features:
+* Multiple, user specified separators
+* Converting all text to lowercase
+* Sorting chunks before comparing the chunks
+* Different input options: Command line, two files, single file or standard input
+* Statistics about the number of chunks and number of characters
+
 ## Example output
 ```
 Line 1: 
