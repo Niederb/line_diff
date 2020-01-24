@@ -1,22 +1,15 @@
-extern crate difference;
-#[macro_use]
-extern crate clap;
+#![forbid(unsafe_code)] 
 
 use clap::{App, Arg};
 use std::error;
 use std::fs::File;
-use std::io;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-use difference::Changeset;
-use difference::Difference;
+use difference::{Changeset, Difference};
 use difference::Difference::{Add, Rem, Same};
 
-#[macro_use]
-extern crate prettytable;
-use prettytable::format;
-use prettytable::Table;
+use prettytable::{format, Table, row, cell};
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -122,7 +115,7 @@ fn get_lines_from_file(path: &Path) -> Result<(LineData, LineData)> {
 fn get_line_from_cmd(line_number: i32) -> LineData {
     println!("Please provide line #{}: ", line_number);
     let mut buffer = String::new();
-    io::stdin().read_line(&mut buffer).expect("");
+    std::io::stdin().read_line(&mut buffer).expect("");
     LineData::new(&format!("Line {}", line_number), &buffer.trim().to_string())
 }
 
@@ -136,7 +129,7 @@ fn get_line(line_number: i32, filepath: Option<&str>) -> Result<LineData> {
 fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     let mut table = Table::new();
     table.set_format(*format::consts::FORMAT_BOX_CHARS);
-    table.add_row(row![bFgc => l1.name, "Same", l2.name]);
+    table.add_row(prettytable::row![bFgc => l1.name, "Same", l2.name]);
     let iterator = diffs.iter();
     let mut row_index = 0;
     let mut previous: Option<String> = None;
@@ -172,8 +165,8 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
 
 fn main() -> Result<()> {
     let matches = App::new("Line diff")
-        .version(crate_version!())
-        .author(crate_authors!())
+        .version(clap::crate_version!())
+        .author(clap::crate_authors!())
         .about("Compare two lines by splitting the lines into smaller chunks and comparing the chunks. \
         There are multiple ways of specifying the two lines: \n \
         \ta single file that contains the two lines (--file option) \n \

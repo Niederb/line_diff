@@ -62,3 +62,8 @@ Compare two lines by specifying the string on the command line
 ```
 line_diff --line1 "hello world" --line2 "hello there"
 ```
+
+Compare two lines, but first convert them both to lowercase
+```
+line_diff --line1 "hello world" --line2 "Hello wOrld" -l
+```
