@@ -12,6 +12,10 @@ repository = "https://github.com/niederb/line_diff"
 keywords = ["cli", "diff", "compare", "text"]
 categories = ["command-line-utilities"]
 
+[lib]
+name = "line_diff"
+path = "src/line_diff.rs"
+
 [dependencies]
 difference = "2.0"
 prettytable-rs = "0.8.0"
