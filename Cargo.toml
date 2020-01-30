@@ -14,5 +14,5 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 difference = "2.0"
-clap = "2.33.0"
 prettytable-rs = "0.8.0"
+structopt = "0.3.8"

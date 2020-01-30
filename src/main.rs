@@ -1,17 +1,56 @@
-#![forbid(unsafe_code)] 
+#![forbid(unsafe_code)]
 
-use clap::{App, Arg};
 use std::error;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-use difference::{Changeset, Difference};
 use difference::Difference::{Add, Rem, Same};
+use difference::{Changeset, Difference};
 
-use prettytable::{format, Table, row, cell};
+use prettytable::{cell, format, row, Table};
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+
+use std::path::PathBuf;
+use structopt::StructOpt;
+
+/// A basic example
+#[derive(StructOpt, Debug)]
+#[structopt(name = "basic")]
+struct Config {
+    /// Whether or not the chunks should be sorted before comparing.
+    #[structopt(short = "o", long)]
+    sort: bool,
+
+    /// Convert the chunks to lowercase before converting
+    #[structopt(short, long)]
+    lowercase: bool,
+
+    /// Separator for splitting lines. It is possible to define multiple separators.
+    #[structopt(short, long, default_value = " ")]
+    separators: Vec<char>,
+
+    /// A single file containing two lines. Remaining lines will be ignored.
+    #[structopt(short, long, parse(from_os_str))]
+    file: Option<PathBuf>,
+
+    /// Path to file containing the first line. Remaining lines will be ignored.
+    #[structopt(long)]
+    file1: Option<String>,
+
+    /// Path to file containing the second line. Remaining lines will be ignored.
+    #[structopt(long)]
+    file2: Option<String>,
+
+    /// First line as string
+    #[structopt(long)]
+    line1: Option<String>,
+
+    /// Second line as string
+    #[structopt(long)]
+    line2: Option<String>,
+}
 
 struct LineData {
     name: String,
@@ -164,102 +203,34 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
 }
 
 fn main() -> Result<()> {
-    let matches = App::new("Line diff")
-        .version(clap::crate_version!())
-        .author(clap::crate_authors!())
-        .about("Compare two lines by splitting the lines into smaller chunks and comparing the chunks. \
-        There are multiple ways of specifying the two lines: \n \
-        \ta single file that contains the two lines (--file option) \n \
-        \tspecifying the two lines separately as a file path (indexed argument 1 and 2), on the command line (--line1 and --line2) or using command line input.")
-        .arg(
-            Arg::with_name("file")
-                .long("file")    
-                .help("A single file containing two lines. Remaining lines will be ignored.")
-                .short("f")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("file1")
-                .help("Path to file containing the first line. Remaining lines will be ignored.")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("file2")
-                .help("Path to file containing the second line. Remaining lines will be ignored.")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("line1")
-                .short("x")
-                .long("line1")
-                .help("First line as string")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("line2")
-                .short("y")
-                .long("line2")
-                .help("Second line as string")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("separator")
-                .short("s")
-                .help("Separator for splitting lines. It is possible to define multiple separators.")
-                .takes_value(true)
-                .multiple(true),
-        )
-        .arg(
-            Arg::with_name("sorted")
-                .short("o")
-                .help("Whether or not the chunks should be sorted before comparing."),
-        )
-        .arg(
-            Arg::with_name("lowercase")
-                .short("l")
-                .help("Convert the chunks to lowercase before converting"),
-        )
-        .get_matches();
+    let opt = Config::from_args();
+    println!("{:#?}", opt);
+    execute(opt)
+}
 
-    let (mut s1, mut s2) = if let Some(filepath) = matches.value_of("file") {
-        let path_file = Path::new(filepath);
-        verify_existing_file(path_file)?;
-        get_lines_from_file(path_file)?
+fn execute(config: Config) -> Result<()> {
+    let (mut s1, mut s2) = if let Some(filepath) = config.file {
+        verify_existing_file(&*filepath)?;
+        get_lines_from_file(&*filepath)?
     } else {
-        let l1 = if let Some(l1) = matches.value_of("line1") {
+        let l1 = if let Some(l1) = config.line1 {
             LineData::new("Line 1", &l1)
         } else {
-            get_line(1, matches.value_of("file1"))?
+            get_line(1, config.file1.as_deref())?
         };
-        let l2 = if let Some(l2) = matches.value_of("line2") {
+        let l2 = if let Some(l2) = config.line2 {
             LineData::new("Line 2", &l2)
         } else {
-            get_line(2, matches.value_of("file2"))?
+            get_line(2, config.file2.as_deref())?
         };
         (l1, l2)
     };
 
-    let sort = matches.is_present("sorted");
-    let lowercase = matches.is_present("lowercase");
-
-    let separator_chars = if matches.is_present("separator") {
-        let separators = matches.values_of("separator").unwrap().collect::<Vec<_>>();
-        let mut separator_chars: Vec<char> = Vec::new();
-        for s in separators {
-            println!("Separator: '{}'", s);
-            for character in s.chars() {
-                separator_chars.push(character);
-            }
-        }
-        separator_chars
-    } else {
-        vec![' ']
-    };
     println!("{}: \n{}", s1.name, s1.line);
     println!("{}: \n{}", s2.name, s2.line);
 
-    s1.preprocess_chunks(&separator_chars, sort, lowercase);
-    s2.preprocess_chunks(&separator_chars, sort, lowercase);
+    s1.preprocess_chunks(&config.separators, config.sort, config.lowercase);
+    s2.preprocess_chunks(&config.separators, config.sort, config.lowercase);
 
     let changeset = Changeset::new(&s1.preprocessed, &s2.preprocessed, "\n");
     print_results(&s1, &s2, changeset.diffs);
