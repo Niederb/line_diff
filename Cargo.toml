@@ -1,6 +1,6 @@
 [package]
 name = "line_diff"
-version = "0.5.1"
+version = "0.6.0"
 authors = ["Thomas Niederberger <thomas@niederb.ch>"]
 edition = "2018"
 
