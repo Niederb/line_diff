@@ -57,16 +57,40 @@ impl Config {
         Config::from_args()
     }
 
-    pub fn from_lines(l1: &str, l2: &str) -> Config {
+    pub fn from_lines(
+        sort: bool,
+        lowercase: bool,
+        separators: Vec<char>,
+        l1: &str,
+        l2: &str,
+    ) -> Config {
         Config {
-            sort: false,
-            lowercase: false,
-            separators: vec![' '],
+            sort,
+            lowercase,
+            separators,
             file: Option::None,
             file1: Option::None,
             file2: Option::None,
             line1: Option::Some(l1.to_string()),
             line2: Option::Some(l2.to_string()),
+        }
+    }
+
+    pub fn from_file(
+        sort: bool,
+        lowercase: bool,
+        separators: Vec<char>,
+        filepath: PathBuf,
+    ) -> Config {
+        Config {
+            sort,
+            lowercase,
+            separators,
+            file: Option::Some(filepath),
+            file1: Option::None,
+            file2: Option::None,
+            line1: Option::None,
+            line2: Option::None,
         }
     }
 }
