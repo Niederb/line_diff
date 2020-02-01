@@ -37,11 +37,11 @@ pub struct Config {
 
     /// Path to file containing the first line. Remaining lines will be ignored.
     #[structopt(long)]
-    file1: Option<String>,
+    file1: Option<PathBuf>,
 
     /// Path to file containing the second line. Remaining lines will be ignored.
     #[structopt(long)]
-    file2: Option<String>,
+    file2: Option<PathBuf>,
 
     /// First line as string
     #[structopt(long)]
@@ -201,9 +201,9 @@ fn get_line_from_cmd(line_number: i32) -> LineData {
     LineData::new(&format!("Line {}", line_number), &buffer.trim().to_string())
 }
 
-fn get_line(line_number: i32, filepath: Option<&str>) -> Result<LineData> {
+fn get_line(line_number: i32, filepath: Option<PathBuf>) -> Result<LineData> {
     match filepath {
-        Some(filepath) => get_line_from_file(Path::new(filepath)),
+        Some(filepath) => get_line_from_file(&*filepath),
         None => Ok(get_line_from_cmd(line_number)),
     }
 }
@@ -253,12 +253,12 @@ pub fn execute(config: Config) -> Result<()> {
         let l1 = if let Some(l1) = config.line1 {
             LineData::new("Line 1", &l1)
         } else {
-            get_line(1, config.file1.as_deref())?
+            get_line(1, config.file1)?
         };
         let l2 = if let Some(l2) = config.line2 {
             LineData::new("Line 2", &l2)
         } else {
-            get_line(2, config.file2.as_deref())?
+            get_line(2, config.file2)?
         };
         (l1, l2)
     };
