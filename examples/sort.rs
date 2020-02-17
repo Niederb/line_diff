@@ -1,4 +1,4 @@
-use line_diff::{execute, Config};
+use line_diff::{compare_lines, Config};
 
 use std::error;
 
@@ -8,10 +8,10 @@ fn main() -> Result<()> {
     println!("Example without sorting");
     let config = Config::from_lines(false, false, vec![' '], "Hello World", "World Hello");
     println!("{:?}", config);
-    execute(config)?;
+    compare_lines(config)?;
 
     println!("Example with sorting");
     let config = Config::from_lines(true, false, vec![' '], "Hello World", "World Hello");
     println!("{:?}", config);
-    execute(config)
+    compare_lines(config)
 }

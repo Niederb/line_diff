@@ -15,7 +15,7 @@ type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-/// A basic example
+/// Configuration struct for comparing two lines
 #[derive(StructOpt, Debug)]
 #[structopt(name = "basic")]
 pub struct Config {
@@ -23,7 +23,7 @@ pub struct Config {
     #[structopt(short = "o", long)]
     sort: bool,
 
-    /// Convert the chunks to lowercase before converting
+    /// Whether or not to convert the chunks to lowercase before comparing
     #[structopt(short, long)]
     lowercase: bool,
 
@@ -53,10 +53,17 @@ pub struct Config {
 }
 
 impl Config {
+    /// Create a config struct by using command line arguments
     pub fn from_cmd_args() -> Config {
         Config::from_args()
     }
 
+    /// Create a Config struct that can be used to compare two lines that are given as &str
+    /// * `sort` Whether or not to sort chunks before comparing
+    /// * `lowercase` Whether or not to convert chunks to lowercase before comparing
+    /// * `separators` List of separators to use for splitting lines into chunks
+    /// * `l1` The first line
+    /// * `l2` The second line
     pub fn from_lines(
         sort: bool,
         lowercase: bool,
@@ -76,6 +83,11 @@ impl Config {
         }
     }
 
+    /// Create a Config struct that can be used to compare two lines that are stored in a single file
+    /// * `sort` Whether or not to sort chunks before comparing
+    /// * `lowercase` Whether or not to convert chunks to lowercase before comparing
+    /// * `separators` List of separators to use for splitting lines into chunks
+    /// * `filepath` Path to the file that contains the two lines
     pub fn from_file(
         sort: bool,
         lowercase: bool,
@@ -245,7 +257,10 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     table.printstd();
 }
 
-pub fn execute(config: Config) -> Result<()> {
+/// Comapare two lines with given configuration.
+///
+/// * `config` - Configuration
+pub fn compare_lines(config: Config) -> Result<()> {
     let (mut s1, mut s2) = if let Some(filepath) = config.file {
         verify_existing_file(&*filepath)?;
         get_lines_from_file(&*filepath)?
