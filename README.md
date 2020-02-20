@@ -13,15 +13,17 @@ Features:
 * Statistics about the number of chunks and number of characters
 
 ## Example output
+Comparing to different cargo commands with arguments in different order. 
+With line_diff it is easy to spot that the only difference is the --release argument
 ```
 Line 1: 
-cargo run -- -o --file l1.txt -s " ;"
+cargo run -- -o --file l1.txt -s ",;"
 Line 2:
-cargo run --release -- --file l1.txt -s " ;" -o
+cargo run --release -- --file l1.txt -s ",;" -o
 ┌────────┬────────────┬───────────┐
 │ Line 1 │    Same    │  Line 2   │
 ├────────┼────────────┼───────────┤
-│        │ "          │           │
+│        │ ",;"       │           │
 │        │ --         │           │
 │        │ --file     │           │
 ├────────┼────────────┼───────────┤
@@ -29,14 +31,13 @@ cargo run --release -- --file l1.txt -s " ;" -o
 ├────────┼────────────┼───────────┤
 │        │ -o         │           │
 │        │ -s         │           │
-│        │ ;"         │           │
 │        │ cargo      │           │
 │        │ l1.txt     │           │
 │        │ run        │           │
 ├────────┼────────────┼───────────┤
 │   37   │ Characters │    47     │
 ├────────┼────────────┼───────────┤
-│   9    │   Chunks   │    10     │
+│   8    │   Chunks   │     9     │
 └────────┴────────────┴───────────┘
 ```
 
