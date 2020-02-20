@@ -5,6 +5,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+use textwrap::{fill, termwidth};
+
 use difference::Difference::{Add, Rem, Same};
 use difference::{Changeset, Difference};
 
@@ -227,27 +229,29 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     let iterator = diffs.iter();
     let mut row_index = 0;
     let mut previous: Option<String> = None;
+    let column_width = (termwidth() - 8) / 3;
+    
     for d in iterator {
         match d {
             Same(line) => {
                 previous = None;
-                table.add_row(row!["", line, ""])
+                table.add_row(row!["", fill(line, column_width), ""])
             }
             Add(line) => {
                 if let Some(previous_line) = previous {
                     table.remove_row(row_index);
                     row_index -= 1;
-                    let new_row = table.add_row(row![previous_line, "", line]);
+                    let new_row = table.add_row(row![fill(&previous_line, column_width), "", fill(line, column_width)]);
                     previous = None;
                     new_row
                 } else {
                     previous = None;
-                    table.add_row(row!["", "", line])
+                    table.add_row(row!["", "", fill(line, column_width)])
                 }
             }
             Rem(line) => {
                 previous = Some(line.to_string());
-                table.add_row(row![line, "", ""])
+                table.add_row(row![fill(line, 18), "", ""])
             }
         };
         row_index += 1;
