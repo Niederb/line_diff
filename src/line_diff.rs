@@ -2,6 +2,7 @@
 
 use std::error;
 use std::fs::File;
+use std::io::prelude::*;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
@@ -52,6 +53,14 @@ pub struct Config {
     /// Second line as string
     #[structopt(long)]
     line2: Option<String>,
+
+    /// File to write the first line after preprocessing to
+    #[structopt(long)]
+    output_file1: Option<PathBuf>,
+
+    /// File to write the second line after preprocessing to
+    #[structopt(long)]
+    output_file2: Option<PathBuf>,
 }
 
 impl Config {
@@ -82,6 +91,8 @@ impl Config {
             file2: Option::None,
             line1: Option::Some(l1.to_string()),
             line2: Option::Some(l2.to_string()),
+            output_file1: Option::None,
+            output_file2: Option::None,
         }
     }
 
@@ -105,6 +116,8 @@ impl Config {
             file2: Option::None,
             line1: Option::None,
             line2: Option::None,
+            output_file1: Option::None,
+            output_file2: Option::None,
         }
     }
 }
@@ -230,7 +243,7 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     let mut row_index = 0;
     let mut previous: Option<String> = None;
     let column_width = (termwidth() - 8) / 3;
-    
+
     for d in iterator {
         match d {
             Same(line) => {
@@ -241,7 +254,11 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
                 if let Some(previous_line) = previous {
                     table.remove_row(row_index);
                     row_index -= 1;
-                    let new_row = table.add_row(row![fill(&previous_line, column_width), "", fill(line, column_width)]);
+                    let new_row = table.add_row(row![
+                        fill(&previous_line, column_width),
+                        "",
+                        fill(line, column_width)
+                    ]);
                     previous = None;
                     new_row
                 } else {
@@ -259,6 +276,19 @@ fn print_results(l1: &LineData, l2: &LineData, diffs: Vec<Difference>) {
     table.add_row(row![bFgc => l1.length(), "Characters", l2.length()]);
     table.add_row(row![bFgc => l1.number_chunks(), "Chunks", l2.number_chunks()]);
     table.printstd();
+}
+
+fn write_output(file: Option<PathBuf>, content: &str) {
+    if let Some(file) = &file {
+        match File::create(file) {
+            Ok(mut file) => {
+                if let Err(error) = file.write_all(content.as_bytes()) {
+                    println!("couldn't write to {:?}: {:?}", file, error)
+                }
+            }
+            Err(error) => println!("couldn't write to {:?}: {:?}", file, error),
+        }
+    }
 }
 
 /// Comapare two lines with given configuration.
@@ -287,6 +317,9 @@ pub fn compare_lines(config: Config) -> Result<()> {
 
     s1.preprocess_chunks(&config.separators, config.sort, config.lowercase);
     s2.preprocess_chunks(&config.separators, config.sort, config.lowercase);
+
+    write_output(config.output_file1, &s1.preprocessed);
+    write_output(config.output_file2, &s2.preprocessed);
 
     let changeset = Changeset::new(&s1.preprocessed, &s2.preprocessed, "\n");
     print_results(&s1, &s2, changeset.diffs);
