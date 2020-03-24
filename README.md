@@ -11,6 +11,7 @@ Features:
 * Sorting chunks before comparing the chunks
 * Different input options: Command line, two files, single file or standard input
 * Statistics about the number of chunks and number of characters
+* Store preprocessed data into files in order to use favorite diff tool
 
 ## Example output
 Comparing to different cargo commands with arguments in different order. 
