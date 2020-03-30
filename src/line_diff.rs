@@ -39,11 +39,11 @@ pub struct Config {
     #[structopt(short, long, parse(from_os_str))]
     file: Option<PathBuf>,
 
-    /// Path to file containing the first line. Remaining lines will be ignored.
+    /// Path to file containing the first line. The complete file will be processed.
     #[structopt(long)]
     file1: Option<PathBuf>,
 
-    /// Path to file containing the second line. Remaining lines will be ignored.
+    /// Path to file containing the second line. The complete file will be processed.
     #[structopt(long)]
     file2: Option<PathBuf>,
 
@@ -172,7 +172,7 @@ fn verify_existing_file(path: &Path) -> Result<()> {
     }
 }
 
-fn get_line_from_file(path: &Path) -> Result<LineData> {
+fn get_lines_from_file(path: &Path) -> Result<LineData> {
     verify_existing_file(path)?;
 
     let file = File::open(path)?;
@@ -193,7 +193,7 @@ fn get_line_from_file(path: &Path) -> Result<LineData> {
     Ok(LineData::new(&file_name, &s))
 }
 
-fn get_lines_from_file(path: &Path) -> Result<(LineData, LineData)> {
+fn get_two_lines_from_file(path: &Path) -> Result<(LineData, LineData)> {
     verify_existing_file(path)?;
 
     let file = File::open(path).unwrap();
@@ -225,7 +225,7 @@ fn get_line_from_cmd(line_number: i32) -> LineData {
 
 fn get_line(line_number: i32, filepath: Option<PathBuf>) -> Result<LineData> {
     match filepath {
-        Some(filepath) => get_line_from_file(&*filepath),
+        Some(filepath) => get_lines_from_file(&*filepath),
         None => Ok(get_line_from_cmd(line_number)),
     }
 }
@@ -292,7 +292,7 @@ fn write_output(file: Option<PathBuf>, content: &str) {
 pub fn compare_lines(config: Config) -> Result<()> {
     let (mut s1, mut s2) = if let Some(filepath) = config.file {
         verify_existing_file(&*filepath)?;
-        get_lines_from_file(&*filepath)?
+        get_two_lines_from_file(&*filepath)?
     } else {
         let l1 = if let Some(l1) = config.line1 {
             LineData::new("Line 1", &l1)
@@ -378,15 +378,15 @@ mod tests {
 
     #[test]
     fn read_one_line() -> Result<()> {
-        let l1 = get_line_from_file(Path::new("examples/test.txt"))?;
+        let l1 = get_lines_from_file(Path::new("examples/test.txt"))?;
         assert_eq!("test.txt", l1.name);
-        assert_eq!("Hello world 1 3 .", l1.line);
+        assert_eq!("Hello world 1 3 .\r\nas the %+3^ night", l1.line);
         Ok(())
     }
 
     #[test]
     fn read_two_lines() -> Result<()> {
-        let (l1, l2) = get_lines_from_file(Path::new("examples/test.txt"))?;
+        let (l1, l2) = get_two_lines_from_file(Path::new("examples/test.txt"))?;
         assert_eq!("Line 1", l1.name);
         assert_eq!("Line 2", l2.name);
         assert_eq!("Hello world 1 3 .", l1.line);
