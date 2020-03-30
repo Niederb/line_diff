@@ -31,6 +31,7 @@ pub struct Config {
     lowercase: bool,
 
     /// Separator for splitting lines. It is possible to define multiple separators.
+    /// Newline is always a separator
     #[structopt(short, long, default_value = " ")]
     separators: Vec<char>,
 
@@ -66,7 +67,9 @@ pub struct Config {
 impl Config {
     /// Create a config struct by using command line arguments
     pub fn from_cmd_args() -> Config {
-        Config::from_args()
+        let mut c = Config::from_args();
+        c.separators.push('\n');
+        c
     }
 
     /// Create a Config struct that can be used to compare two lines that are given as &str
@@ -173,22 +176,14 @@ fn get_line_from_file(path: &Path) -> Result<LineData> {
     verify_existing_file(path)?;
 
     let file = File::open(path)?;
-    let reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
 
     let mut s = "".to_owned();
-    for (index, line) in reader.lines().enumerate() {
-        let line = line?;
-
-        if index == 0 {
-            s = line.to_owned();
-        } else {
-            println!("File contains additional lines that will be ignored");
-            break;
-        }
-    }
-    let file_name = if let Some(file_name2) = path.file_name() {
-        if let Ok(file_name3) = file_name2.to_os_string().into_string() {
-            file_name3
+    reader.read_to_string(&mut s)?;
+    
+    let file_name = if let Some(file_name) = path.file_name() {
+        if let Ok(file_name) = file_name.to_os_string().into_string() {
+            file_name
         } else {
             "".into()
         }
@@ -312,8 +307,8 @@ pub fn compare_lines(config: Config) -> Result<()> {
         (l1, l2)
     };
 
-    println!("{}: \n{}", s1.name, s1.line);
-    println!("{}: \n{}", s2.name, s2.line);
+    //println!("{}: \n{}", s1.name, s1.line);
+    //println!("{}: \n{}", s2.name, s2.line);
 
     s1.preprocess_chunks(&config.separators, config.sort, config.lowercase);
     s2.preprocess_chunks(&config.separators, config.sort, config.lowercase);

@@ -1,0 +1,3 @@
+c:\t1.txt
+c:\documents\t2.txt
+c:\documents\data\t3.txt
