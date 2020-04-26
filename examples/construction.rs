@@ -12,7 +12,12 @@ fn main() -> Result<()> {
     compare_lines(config)?;
 
     println!("Example with using a single file containing two lines");
-    let config = Config::from_file(false, false, vec![' '], PathBuf::from("examples/twolines.txt"));
+    let config = Config::from_file(
+        false,
+        false,
+        vec![' '],
+        PathBuf::from("examples/twolines.txt"),
+    );
     println!("{:?}", config);
     compare_lines(config)
 }

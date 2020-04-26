@@ -180,7 +180,7 @@ fn get_lines_from_file(path: &Path) -> Result<LineData> {
 
     let mut s = "".to_owned();
     reader.read_to_string(&mut s)?;
-    
+
     let file_name = if let Some(file_name) = path.file_name() {
         if let Ok(file_name) = file_name.to_os_string().into_string() {
             file_name
