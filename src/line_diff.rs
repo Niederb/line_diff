@@ -20,7 +20,7 @@ use structopt::StructOpt;
 
 /// Configuration struct for comparing two lines
 #[derive(StructOpt, Debug)]
-#[structopt(name = "basic")]
+#[structopt(author, about)]
 pub struct Config {
     /// Whether or not the chunks should be sorted before comparing.
     #[structopt(short = "o", long)]
@@ -35,16 +35,14 @@ pub struct Config {
     #[structopt(short, long, default_value = " ")]
     separators: Vec<char>,
 
-    /// A single file containing two lines. Remaining lines will be ignored.
+    /// A single file containing two lines. Additional lines will be ignored.
     #[structopt(short, long, parse(from_os_str))]
     file: Option<PathBuf>,
 
     /// Path to file containing the first line. The complete file will be processed.
-    #[structopt(long)]
     file1: Option<PathBuf>,
 
     /// Path to file containing the second line. The complete file will be processed.
-    #[structopt(long)]
     file2: Option<PathBuf>,
 
     /// First line as string
@@ -56,11 +54,11 @@ pub struct Config {
     line2: Option<String>,
 
     /// File to write the first line after preprocessing to
-    #[structopt(long)]
+    #[structopt(long, short = "m")]
     output_file1: Option<PathBuf>,
 
     /// File to write the second line after preprocessing to
-    #[structopt(long)]
+    #[structopt(long, short = "n")]
     output_file2: Option<PathBuf>,
 }
 

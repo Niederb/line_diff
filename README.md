@@ -1,6 +1,6 @@
 # line_diff
 Tool to make a diff between to single lines. The intended use case is to compare long lines where parts are different or missing.
-For example:
+Example comparison use cases:
 * long command lines with many arguments and flags
 * Compiler commands with many paths (with potentially different order)
 * Long function declarations with slightly different arguments
@@ -11,7 +11,7 @@ Features:
 * Sorting chunks before comparing the chunks
 * Different input options: Command line, two files, single file or standard input
 * Statistics about the number of chunks and number of characters
-* Store preprocessed data into files in order to use favorite diff tool
+* Store preprocessed data into files in order to use external diff tool
 
 ## Example output
 Comparing to different cargo commands with arguments in different order. 
