@@ -378,7 +378,7 @@ mod tests {
     fn read_one_line() -> Result<()> {
         let l1 = get_lines_from_file(Path::new("examples/test.txt"))?;
         assert_eq!("test.txt", l1.name);
-        assert_eq!("Hello world 1 3 .\r\nas the %+3^ night", l1.line);
+        assert_eq!("Hello world 1 3 .\nas the %+3^ night", l1.line);
         Ok(())
     }
 
