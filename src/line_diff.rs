@@ -154,7 +154,7 @@ impl LineData {
         };
         let mut chunks: Vec<&str> = case_adjusted.split(|c| separator.contains(&c)).collect();
         if sort {
-            chunks.sort();
+            chunks.sort_unstable();
         }
         self.preprocessed = chunks.join("\n");
     }
