@@ -1,6 +1,6 @@
 [package]
 name = "line_diff"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["Thomas Niederberger <thomas@niederb.ch>"]
 edition = "2018"
 
@@ -20,4 +20,4 @@ path = "src/line_diff.rs"
 difference = "2.0"
 prettytable-rs = "0.8"
 structopt = "0.3"
-textwrap = { version = "0.12", features = ["terminal_size"] }
+textwrap = { version = "0.13", features = ["terminal_size"] }
