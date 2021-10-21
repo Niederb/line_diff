@@ -1,8 +1,8 @@
 [package]
 name = "line_diff"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["Thomas Niederberger <thomas@niederb.ch>"]
-edition = "2018"
+edition = "2021"
 
 license = "MIT OR Apache-2.0"
 description = "A tool to compare single lines by tokenizing them into chunks"
