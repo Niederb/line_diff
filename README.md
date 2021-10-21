@@ -1,8 +1,8 @@
 # line_diff
 
 ![Rust](https://github.com/Niederb/line_diff/workflows/build/badge.svg)
-Tool to make a diff between to single lines. The intended use case is to compare long lines where parts are different or missing.
-Example comparison use cases:
+Tool to compare two single lines of text. The intended use case is to compare long lines where parts are different or missing.
+Example use cases:
 
 - long command lines with many arguments and flags
 - Compiler commands with many paths (with potentially different order)

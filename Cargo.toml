@@ -20,4 +20,4 @@ path = "src/line_diff.rs"
 difference = "2.0"
 prettytable-rs = "0.8"
 structopt = "0.3"
-textwrap = { version = "0.13", features = ["terminal_size"] }
+textwrap = { version = "0.14", features = ["terminal_size"] }
