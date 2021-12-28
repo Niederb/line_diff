@@ -218,7 +218,7 @@ fn get_line_from_cmd(line_number: i32) -> LineData {
     println!("Please provide line #{}: ", line_number);
     let mut buffer = String::new();
     std::io::stdin().read_line(&mut buffer).expect("");
-    LineData::new(&format!("Line {}", line_number), &buffer.trim().to_string())
+    LineData::new(&format!("Line {}", line_number), buffer.trim())
 }
 
 fn get_line(line_number: i32, filepath: Option<PathBuf>) -> Result<LineData> {
