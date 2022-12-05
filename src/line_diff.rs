@@ -1,22 +1,18 @@
 #![forbid(unsafe_code)]
 
+use difference::Difference::{Add, Rem, Same};
+use difference::{Changeset, Difference};
+use prettytable::{format, row, Table};
 use std::error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-
-use textwrap::{fill, termwidth};
-
-use difference::Difference::{Add, Rem, Same};
-use difference::{Changeset, Difference};
-
-use prettytable::{cell, format, row, Table};
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
-
 use std::path::PathBuf;
 use structopt::StructOpt;
+use textwrap::{fill, termwidth};
+
+type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 /// Configuration struct for comparing two lines
 #[derive(StructOpt, Debug)]

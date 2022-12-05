@@ -1,9 +1,8 @@
 #![forbid(unsafe_code)]
 
-use std::error;
-
 use line_diff::compare_lines;
 use line_diff::Config;
+use std::error;
 
 type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
 

@@ -1,6 +1,6 @@
 [package]
 name = "line_diff"
-version = "0.13.0"
+version = "0.13.1"
 authors = ["Thomas Niederberger <thomas@niederb.ch>"]
 edition = "2021"
 
@@ -18,6 +18,6 @@ path = "src/line_diff.rs"
 
 [dependencies]
 difference = "2.0"
-prettytable-rs = "0.8"
+prettytable-rs = "0.9"
 structopt = "0.3"
-textwrap = { version = "0.14", features = ["terminal_size"] }
+textwrap = { version = "0.16", features = ["terminal_size"] }
