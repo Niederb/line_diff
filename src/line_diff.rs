@@ -219,7 +219,7 @@ fn get_line_from_cmd(line_number: i32) -> LineData {
 
 fn get_line(line_number: i32, filepath: Option<PathBuf>) -> Result<LineData> {
     match filepath {
-        Some(filepath) => get_lines_from_file(&*filepath),
+        Some(filepath) => get_lines_from_file(&filepath),
         None => Ok(get_line_from_cmd(line_number)),
     }
 }
@@ -285,8 +285,8 @@ fn write_output(file: Option<PathBuf>, content: &str) {
 /// * `config` - Configuration
 pub fn compare_lines(config: Config) -> Result<()> {
     let (mut s1, mut s2) = if let Some(filepath) = config.file {
-        verify_existing_file(&*filepath)?;
-        get_two_lines_from_file(&*filepath)?
+        verify_existing_file(&filepath)?;
+        get_two_lines_from_file(&filepath)?
     } else {
         let l1 = if let Some(l1) = config.line1 {
             LineData::new("Line 1", &l1)
